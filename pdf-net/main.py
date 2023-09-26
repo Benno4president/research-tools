@@ -138,7 +138,8 @@ if __name__ == '__main__':
     
     print("Preview of the document list:")
     print(doc_df)
-
+    doc_df.to_csv('./document_df.csv', index=False, encoding='utf-8')
+    #exit()
     words = doc_2_wordlist(doc_df, 'txt')
     print(words)
 
