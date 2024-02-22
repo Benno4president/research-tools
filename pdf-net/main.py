@@ -1,7 +1,8 @@
-import sys
 import os
-import fitz
 import re
+import sys
+import fitz
+import string
 import networkx as nx
 
 path = lambda *x: os.path.abspath(os.path.join(os.path.dirname(__file__), *x))
@@ -18,6 +19,25 @@ def get_pdf_text(pdf_path):
                     text = re.sub(r"([a-zA-Z])- ?([a-zA-Z])", r"\1\2", text)
                     pdf_text += f"{text}\n"
     return pdf_text.encode(errors='replace').decode()
+
+import nltk
+nltk.download('averaged_perceptron_tagger')
+"""
+nltk tag legend
+https://stackoverflow.com/questions/15388831/what-are-all-possible-pos-tags-of-nltk
+OBSERVATION: 
+    'NNS' only allows for selecting top k top represent the group. fx systems, drones, data, results, applications
+    'NN' does too. fx drone, UAV, network, control, Online, search. but also pp, m, vol, et, al
+    'NNP' is trash. Australia, 8, January
+"""
+
+def is_noun(word:str):
+    tagged_sentence = nltk.tag.pos_tag([word])
+    #edited_sentence = [word for word,tag in tagged_sentence if tag != 'NNP' and tag != 'NNPS']
+    #return ' '.join(edited_sentence)
+    w, tag = tagged_sentence[0]
+    ok = (tag in ['NN','NNS']) 
+    return ok
 
 import csv
 import pandas as pd
@@ -48,7 +68,7 @@ def doc_2_wordlist(df: pd.DataFrame, text_key: str):
         words = {}
         for token in tokens:
             if not token.is_stop and token.is_alpha:
-                t = token.text
+                t = token.text.lower()
                 if t not in words:
                     words[t] = {'W-text': t, 'W-count':0}
                 words[t]['W-count'] += 1
@@ -126,8 +146,24 @@ def text_2_network_graph(text_df:pd.DataFrame, id_key:str, text_key:str, word_df
     return G
 
 
+RANDOM_BS_I_DONT_LIKE_AARRHH = list(string.ascii_lowercase) + [
+    'pp', 'proc', 'vol', 'et', 'al',
+    'ieee','time','use','uses','results',
+    'number', 'distance','figure',
+    'exp','authors','set','wiley','fig',
+    'value','syst','university','doi','eq'
+]
+def clean_words(wo:pd.DataFrame):
+    wo = wo[~wo['text'].isin(RANDOM_BS_I_DONT_LIKE_AARRHH)]
+    wo = wo[wo['text'].apply(is_noun)]
+    #wo = wo[wo['count-occurences-total'] > 5]
+    #wo = wo[wo['count-documents'] > 5] # MAKE THIS DYNAMIC TODO TODO TODO TODO
+    return wo
+
+
 if __name__ == '__main__':
     files = [x for x in os.listdir(path(pdf_dir)) if x.endswith('.pdf')]
+    files = [files[2]]
     paths = [os.path.join(pdf_dir,x) for x in files]
     pdf_texts = [get_pdf_text(x) for x in paths]
 
@@ -138,12 +174,18 @@ if __name__ == '__main__':
     
     print("Preview of the document list:")
     print(doc_df)
-    doc_df.to_csv('./document_df.csv', index=False, encoding='utf-8')
+    doc_df.to_csv('./document_df.csv', index=False, encoding='utf-8', escapechar='\\')
     #exit()
     words = doc_2_wordlist(doc_df, 'txt')
     print(words)
+    words = clean_words(words)
 
-    graph = text_2_network_graph(text_df=doc_df, id_key='temp_index', text_key='txt', word_df=words, word_key='text')
+    topK_words = words.sort_values('count-occurences-total',ascending=False).head(50)
+    print(list(topK_words['text']))
 
-    output_file_network = "./document-network.gexf"
-    nx.write_gexf(graph, output_file_network)
+    #graph = text_2_network_graph(text_df=doc_df, id_key='temp_index', text_key='txt', word_df=words, word_key='text')
+
+    #output_file_network = "./document-network.gexf"
+    #nx.write_gexf(graph, output_file_network)
+
+
