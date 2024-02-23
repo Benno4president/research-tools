@@ -3,3 +3,5 @@ networkx
 nltk
 pandas
 spacy
+wordcloud
+matplotlib

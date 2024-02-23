@@ -1,10 +1,28 @@
+"""
+Copyright Kristian Bengtson 2024
+
+DISCLAIMER:
+    All this code is trash, i will fix it oneday..
+
+
+"""
 import os
 import re
 import sys
+import csv
 import fitz
 import string
 import argparse
 import networkx as nx
+import pandas as pd
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from spacy.lang.en import English
+import nltk
+
+nltk.download('averaged_perceptron_tagger')
+
+
 
 path = lambda *x: os.path.abspath(os.path.join(os.path.dirname(__file__), *x))
 pdf_dir = './docs'
@@ -21,8 +39,6 @@ def get_pdf_text(pdf_path):
                     pdf_text += f"{text}\n"
     return pdf_text.encode(errors='replace').decode()
 
-import nltk
-nltk.download('averaged_perceptron_tagger')
 """
 nltk tag legend
 https://stackoverflow.com/questions/15388831/what-are-all-possible-pos-tags-of-nltk
@@ -40,9 +56,6 @@ def is_noun(word:str):
     ok = (tag in ['NN','NNS']) 
     return ok
 
-import csv
-import pandas as pd
-from spacy.lang.en import English
 
 
 """
@@ -164,6 +177,13 @@ def clean_words(wo:pd.DataFrame):
     #wo = wo[wo['count-documents'] > 5] # MAKE THIS DYNAMIC TODO TODO TODO TODO
     return wo
 
+def word_cloud(word_count:dict[str,int]):
+    # lower max_font_size, change the maximum number of word and lighten the background:
+    wordcloud = WordCloud(width=1920, height=1080,max_font_size=150, max_words=250, background_color="white").generate_from_frequencies(word_count)
+    plt.figure()
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    plt.show()
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -199,9 +219,18 @@ if __name__ == '__main__':
     topK_words = words.sort_values('count-occurences-total',ascending=False).head(50)
     print(list(topK_words['text']))
 
+    as_dict = dict(topK_words[['text','count-occurences-total']].values)
+    word_cloud(as_dict)
+
     #graph = text_2_network_graph(text_df=doc_df, id_key='temp_index', text_key='txt', word_df=words, word_key='text')
 
     #output_file_network = "./document-network.gexf"
     #nx.write_gexf(graph, output_file_network)
 
-
+    # https://colab.research.google.com/github/jacomyma/mapping-controversies/blob/main/notebooks/Words_and_documents_with_text_to_document_list_with_words.ipynb
+    # https://colab.research.google.com/github/jacomyma/mapping-controversies/blob/main/notebooks/Documents_with_text_to_word_list.ipynb
+    ## Frequency of word set in pdf
+    # find clusters
+    # validate cluster ???
+    # find cluster with highest frequency of word set
+    # select papers
