@@ -3,6 +3,7 @@ import re
 import sys
 import fitz
 import string
+import argparse
 import networkx as nx
 
 path = lambda *x: os.path.abspath(os.path.join(os.path.dirname(__file__), *x))
@@ -151,7 +152,10 @@ RANDOM_BS_I_DONT_LIKE_AARRHH = list(string.ascii_lowercase) + [
     'ieee','time','use','uses','results',
     'number', 'distance','figure',
     'exp','authors','set','wiley','fig',
-    'value','syst','university','doi','eq'
+    'value','syst','university','doi','eq',
+    'σ', 'μ', 'π',# make real fix
+    'ij','rl','oa','nj',
+    'sep', 
 ]
 def clean_words(wo:pd.DataFrame):
     wo = wo[~wo['text'].isin(RANDOM_BS_I_DONT_LIKE_AARRHH)]
@@ -161,23 +165,35 @@ def clean_words(wo:pd.DataFrame):
     return wo
 
 
-if __name__ == '__main__':
-    files = [x for x in os.listdir(path(pdf_dir)) if x.endswith('.pdf')]
-    files = [files[2]]
-    paths = [os.path.join(pdf_dir,x) for x in files]
-    pdf_texts = [get_pdf_text(x) for x in paths]
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('file', nargs='?', const='', type=argparse.FileType())
+    args = parser.parse_args()
+    return args
 
+if __name__ == '__main__':
+    args = parse_args()
+    
+    if args.file: 
+        files = [args.file]
+        paths = [args.file]
+    else:
+        # hahah this is fucked, fix if folder feature is needed.
+        files = [x for x in os.listdir(path(pdf_dir)) if x.endswith('.pdf')]
+        paths = [os.path.join(pdf_dir,x) for x in files]
+
+    pdf_texts = [get_pdf_text(x) for x in paths]
 
     doc_df = pd.DataFrame(pdf_texts, columns=['txt'])
     doc_df['title'] = files
     doc_df['temp_index'] = range(0,len(doc_df))
     
-    print("Preview of the document list:")
-    print(doc_df)
-    doc_df.to_csv('./document_df.csv', index=False, encoding='utf-8', escapechar='\\')
+    #print("Preview of the document list:")
+    #print(doc_df)
+    #doc_df.to_csv('./document_df.csv', index=False, encoding='utf-8', escapechar='\\')
     #exit()
     words = doc_2_wordlist(doc_df, 'txt')
-    print(words)
+    #print(words)
     words = clean_words(words)
 
     topK_words = words.sort_values('count-occurences-total',ascending=False).head(50)

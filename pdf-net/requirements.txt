@@ -1,0 +1,5 @@
+pymupdf
+networkx
+nltk
+pandas
+spacy
