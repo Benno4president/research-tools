@@ -1,9 +1,9 @@
 #https://python.langchain.com/en/latest/modules/models/llms/integrations/gpt4all.html
 #https://python.langchain.com/en/latest/modules/memory/types/kg.html
-#import gpt4all
+import gpt4all
 import scipdf
 
-#gptj = gpt4all.GPT4All("ggml-model-gpt4all-falcon-q4_0")
+gptj = gpt4all.GPT4All("ggml-model-gpt4all-falcon-q4_0")
 context = []
 pre_text = "Classify this sentence from a research paper: "
 
