@@ -107,14 +107,15 @@ def google_search(q:str) -> list[SearchResult]:
     ]
     results:list[SearchResult] = []
     for query_ext in exstentions:
-        gsearch:list[SearchResult] = search(term=' '.join([q, query_ext, limit]), advanced=True, sleep_interval=random.randint(1,3))
+        composed_query = ' '.join([q, query_ext, limit])
+        print('q:',composed_query)
+        gsearch:list[SearchResult] = search(term=composed_query, advanced=True, sleep_interval=random.randint(2,4))
         for rslt in gsearch:
             results.append(rslt)
     return results
 
 if __name__ == '__main__':
     search_string = ' '.join(sys.argv[1:])
-    print(search_string)
     results = google_search(search_string)
     titles = [x.title.lower().removeprefix('(pdf) ').removesuffix(' ...')+' - '+x.url for x in results]
     #pprint(titles)
