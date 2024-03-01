@@ -208,6 +208,7 @@ if __name__ == '__main__':
     doc_df['title'] = files
     doc_df['temp_index'] = range(0,len(doc_df))
     
+    
     #print("Preview of the document list:")
     #print(doc_df)
     #doc_df.to_csv('./document_df.csv', index=False, encoding='utf-8', escapechar='\\')
