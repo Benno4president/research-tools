@@ -6,11 +6,7 @@ import random
 import sys
 from pprint import pprint
 
-try:
-    import util_link
-    from weird_console import ANSI_RAINBOW_LINE
-except:
-    ANSI_RAINBOW_LINE = lambda x: x
+from rainbows import ANSI_RAINBOW_LINE
 
 
 def get_useragent():
