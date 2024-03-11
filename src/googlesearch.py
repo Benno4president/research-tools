@@ -1,4 +1,6 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+#!/c/Windows/py
+#!\c\Windows\py
 
 
 """googlesearch is a Python library for searching Google, easily."""
