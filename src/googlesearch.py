@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+
+
 """googlesearch is a Python library for searching Google, easily."""
 from time import sleep
 from bs4 import BeautifulSoup
