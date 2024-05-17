@@ -5,3 +5,5 @@ pandas
 spacy
 wordcloud
 matplotlib
+contractions
+bs4
